@@ -61,7 +61,9 @@
 .classpath        FILE
 .factorypath      FILE
 .project          FILE
-flattened-pom.xml FILE
+.flattened-pom.xml FILE
+.worktrees        FILE
+.settings         DIR
 ```
 
 ### JSON 规则格式

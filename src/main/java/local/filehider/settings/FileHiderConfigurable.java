@@ -22,6 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.BorderLayout;
@@ -72,25 +73,28 @@ public final class FileHiderConfigurable implements Configurable {
     public boolean isModified() {
         FileHiderSettings.State state = FileHiderSettings.getInstance().getState();
         return enabledCheckBox.isSelected() != state.enabled
-                || !sameRules(defaultRulesPanel.rules(), state.defaultRules)
-                || !sameRules(userRulesPanel.rules(), state.userRules);
+                || !sameRules(defaultRulesPanel.rules(false), state.defaultRules)
+                || !sameRules(userRulesPanel.rules(false), state.userRules);
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        String defaultError = RuleValidator.validate(defaultRulesPanel.rules());
+        List<FileHiderRule> defaultRules = defaultRulesPanel.rules(true);
+        List<FileHiderRule> userRules = userRulesPanel.rules(true);
+
+        String defaultError = RuleValidator.validate(defaultRules);
         if (defaultError != null) {
             throw new ConfigurationException(defaultError, "Default rules");
         }
-        String userError = RuleValidator.validate(userRulesPanel.rules());
+        String userError = RuleValidator.validate(userRules);
         if (userError != null) {
             throw new ConfigurationException(userError, "User rules");
         }
 
         FileHiderSettings.State next = new FileHiderSettings.State();
         next.enabled = enabledCheckBox.isSelected();
-        next.defaultRules = FileHiderSettings.normalizeRules(defaultRulesPanel.rules());
-        next.userRules = FileHiderSettings.normalizeRules(userRulesPanel.rules());
+        next.defaultRules = FileHiderSettings.normalizeRules(defaultRules);
+        next.userRules = FileHiderSettings.normalizeRules(userRules);
         FileHiderSettings.getInstance().update(next);
     }
 
@@ -157,12 +161,27 @@ public final class FileHiderConfigurable implements Configurable {
             add(buttons, BorderLayout.SOUTH);
         }
 
-        private List<FileHiderRule> rules() {
-            stopEditing();
+        private List<FileHiderRule> rules(boolean commitEditing) {
+            if (commitEditing) {
+                stopEditing();
+            }
+
+            int editingRow = commitEditing ? -1 : table.getEditingRow();
+            int editingColumn = commitEditing ? -1 : table.getEditingColumn();
+            Object editingValue = currentEditingValue();
+
             List<FileHiderRule> rules = new ArrayList<>();
             for (int row = 0; row < model.getRowCount(); row++) {
-                String name = Objects.toString(model.getValueAt(row, 0), "");
+                Object nameValue = model.getValueAt(row, 0);
                 Object typeValue = model.getValueAt(row, 1);
+                if (editingRow >= 0 && table.convertRowIndexToModel(editingRow) == row) {
+                    if (editingColumn == 0) {
+                        nameValue = editingValue;
+                    } else if (editingColumn == 1) {
+                        typeValue = editingValue;
+                    }
+                }
+                String name = Objects.toString(nameValue, "");
                 RuleType type = typeValue instanceof RuleType ruleType
                         ? ruleType
                         : RuleType.valueOf(Objects.toString(typeValue, RuleType.BOTH.name()));
@@ -216,7 +235,7 @@ public final class FileHiderConfigurable implements Configurable {
             try {
                 Files.writeString(
                         chooser.getSelectedFile().toPath(),
-                        GSON.toJson(rules()),
+                        GSON.toJson(rules(true)),
                         StandardCharsets.UTF_8
                 );
             } catch (IOException exception) {
@@ -228,6 +247,14 @@ public final class FileHiderConfigurable implements Configurable {
             if (table.isEditing()) {
                 table.getCellEditor().stopCellEditing();
             }
+        }
+
+        private Object currentEditingValue() {
+            if (!table.isEditing()) {
+                return null;
+            }
+            TableCellEditor editor = table.getCellEditor();
+            return editor == null ? null : editor.getCellEditorValue();
         }
     }
 }
