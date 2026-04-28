@@ -32,7 +32,7 @@ public final class FileHiderSettings implements PersistentStateComponent<FileHid
                 new FileHiderRule(".factorypath", RuleType.FILE),
                 new FileHiderRule(".project", RuleType.FILE),
                 new FileHiderRule(".flattened-pom.xml", RuleType.FILE),
-                new FileHiderRule(".worktrees", RuleType.FILE),
+                new FileHiderRule(".worktrees", RuleType.DIR),
                 new FileHiderRule(".settings", RuleType.DIR)
         );
     }
