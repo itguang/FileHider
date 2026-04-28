@@ -1,0 +1,40 @@
+<idea-plugin>
+    <id>local.filehider</id>
+    <name>File Hider</name>
+    <vendor>Local</vendor>
+
+    <description>
+        Hides configured file and directory names from IntelliJ IDEA Project Tree without changing the filesystem,
+        indexing, VCS, search, or build behavior.
+    </description>
+
+    <change-notes>
+        Initial version with global rules, import/export, Project View filtering, and a per-project show-hidden toggle.
+    </change-notes>
+
+    <idea-version since-build="242"/>
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="local.filehider.settings.FileHiderSettings"/>
+        <treeStructureProvider implementation="local.filehider.tree.FileHiderTreeStructureProvider" order="last"/>
+        <applicationConfigurable
+                instance="local.filehider.settings.FileHiderConfigurable"
+                displayName="File Hider"
+                parentId="tools"/>
+    </extensions>
+
+    <applicationListeners>
+        <listener topic="local.filehider.settings.FileHiderSettingsListener"
+                  class="local.filehider.settings.ProjectViewRefreshListener"/>
+    </applicationListeners>
+
+    <actions>
+        <action id="FileHider.ShowHiddenFiles"
+                class="local.filehider.actions.ShowHiddenFilesAction"
+                text="Show Hidden Files"
+                description="Temporarily show files hidden by File Hider in this project">
+            <add-to-group group-id="ProjectView.ToolWindow.Appearance.Actions" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
