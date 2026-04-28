@@ -1,0 +1,31 @@
+<svg width="40" height="40" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- 背景：米白色 -->
+    <rect width="300" height="300" fill="#f9f9f7"/>
+
+    <!-- 文件夹轮廓 -->
+    <!-- 使用深蓝色描边，无填充 -->
+    <path
+            d="M60 120 L80 90 H220 L240 120 V230 H60 Z"
+            fill="none"
+            stroke="#1a2c42"
+            stroke-width="12"
+            stroke-linejoin="round"
+    />
+
+    <!-- 眼睛图标 -->
+    <!-- 位于文件夹正中间 -->
+    <g transform="translate(150, 140)">
+        <!-- 眼眶：上下弧线 -->
+        <path
+                d="M-35 0 Q0 -35 35 0 Q0 35 -35 0"
+                fill="none"
+                stroke="#5c9edc"
+                stroke-width="10"
+                stroke-linecap="round"
+        />
+        <!-- 瞳孔 -->
+        <circle cx="0" cy="0" r="12" fill="#5c9edc"/>
+        <!-- 眼神光（高光点） -->
+        <circle cx="-4" cy="-4" r="4" fill="#f9f9f7"/>
+    </g>
+</svg>
